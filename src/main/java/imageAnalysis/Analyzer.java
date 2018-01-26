@@ -17,8 +17,9 @@ import ij.plugin.filter.ParticleAnalyzer;
 
 import dataAnalysis.CSV_Compiler;
 
+//TODO: make this multi-threaded to boost performance
 /* Current issues:
- * 		- the macro & pa.analyze(IJ.getImage()) throw "There are no images open."
+ * 		- can't call macro unless a hard-coded aboslute path is used
  */
 
 /* Code outline
