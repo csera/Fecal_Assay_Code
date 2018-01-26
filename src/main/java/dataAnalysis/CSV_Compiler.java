@@ -15,6 +15,10 @@ import java.nio.file.Paths;
 
 import ij.plugin.PlugIn;
 
+
+/* Current issues: listAvg() does not always actually take avg of n 
+ * 		--> listSD() won't work with it if expanded beyond current functionality
+ */
 /* Code outline:
  * 
  * main
@@ -82,18 +86,26 @@ public class CSV_Compiler implements PlugIn {
 
 	public void run(String csvRoot) {
 		
-		/*Path csvDir = Paths.get(csvRoot);
+		Path csvDir = Paths.get(csvRoot);
 		
 		List<Path> csvList = getCsvs(csvDir);
 		List<DataObj> csvSummary = new ArrayList<>();
 		
 		for(Path p : csvList) {
-			csvSummary.add(parseCsv(p));
-		}*/
+			System.out.println("Working on: "+p);
+			csvSummary.add(summarizeCsv(p));
+		}
 		
 		//for testing code against a single csv
-		summarizeCsv(Paths.get("C:/Users/oddba/Pictures/ImgeJ Output/Untitled.csv"));
+		//summarizeCsv(Paths.get("C:/Users/oddba/Pictures/ImgeJ Output/Untitled.csv"));
 		
+		DataObj superAvg = listAvg(csvSummary,false);
+		superAvg.setName("Group avg");
+		superAvg.printProps();
+		
+		DataObj superSD = listSD(csvSummary,superAvg);
+		superSD.setName("Group SD");
+		superSD.printProps();
 	}
 	
 	public List<Path> getCsvs (Path dir){
@@ -116,27 +128,32 @@ public class CSV_Compiler implements PlugIn {
 	}
 	
 	public boolean isCsv(Path item) {
-		boolean csv;
 		
 		String type = item.getFileName().toString();
-		int typeStart = type.lastIndexOf("."); //recall: Strings are zero-indexed
-		type = type.substring(typeStart);
+		int typeStart = type.lastIndexOf(".");
+		//lastIndexOf() returns -1 if no match found
+		//Recall: Strings are zero-indexed
 		
-		if(type.equalsIgnoreCase(".csv")) {
-			csv = true;
+		if(typeStart >= 0) {
+			type = type.substring(typeStart);
+			
+			if(type.equalsIgnoreCase(".csv")) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		else {
-			csv = false;
+			return false;
 		}
-		
-		return csv;
 	}
 	
 	public DataObj summarizeCsv(Path csvPath) {
 		
 		List<DataObj> csvItems = parseCsv(csvPath);
 		
-		DataObj csvSummary = listAvg(csvItems);
+		DataObj csvSummary = listAvg(csvItems,true);
 		
 		//Give csvSummary name of the file it summarizes
 		String sampName = csvPath.getFileName().toString();
@@ -154,12 +171,11 @@ public class CSV_Compiler implements PlugIn {
 		
 		try {
 			CSVReader reader = new CSVReader(new FileReader(csvPath.toString()));
-			System.out.println("Reading: "+csvPath);
 
 			int rowNum = 0;
 			String[] line;
 			
-			while((line = reader.readNext())!=null) {
+			while((line = reader.readNext()) != null) {
 				if(rowNum != 0) {
 					DataObj lineObj = new DataObj(
 							line[0], //name is the measurement #
@@ -185,30 +201,56 @@ public class CSV_Compiler implements PlugIn {
 		return csvItems;
 	}
 	
-	public DataObj listAvg(List<DataObj> list) {
+	
+	public DataObj listAvg(List<DataObj> list, boolean fromFile) {
 		DataObj avgs;
 
 		System.out.println("averaging...");
 		
 		double n = 0, area = 0, mean = 0, intDen = 0;
 		
-		for(DataObj o : list) {
-			area += o.getArea();
-			mean += o.getMean();
-			intDen += o.getIntDen();
+		//Compute total # of data points for avgs's num if using data from a file
+		if(fromFile) {
+			for(DataObj o : list) {
+				area += o.getArea();
+				mean += o.getMean();
+				intDen += o.getIntDen();
+				
+				n++;
+			}
 			
-			n++;
+			area = area/n;
+			mean = mean/n;
+			intDen = intDen/n;
+			
+			System.out.println("Done averaging");
+			avgs = new DataObj(n,area,mean,intDen);
 		}
-		
-		area = area/n;
-		mean = mean/n;
-		intDen = intDen/n;
-		
-		System.out.println("Done averaging");
-		avgs = new DataObj(n,area,mean,intDen);
+		//If actually reading a list of csv summaries, do get actual avg(n)
+		else {
+			double num = 0;
+			
+			for(DataObj o : list) {
+				num += o.getNum();
+				area += o.getArea();
+				mean += o.getMean();
+				intDen += o.getIntDen();
+				
+				n++;
+			}
+			
+			num = num/n;
+			area = area/n;
+			mean = mean/n;
+			intDen = intDen/n;
+			
+			System.out.println("Done averaging");
+			avgs = new DataObj(num,area,mean,intDen);
+		}
 		
 		return avgs;
 	}
+	
 	
 	public DataObj listSD(List<DataObj> list, DataObj avgs) {
 		DataObj sdObj;
@@ -223,7 +265,7 @@ public class CSV_Compiler implements PlugIn {
 			n++;
 		}
 		
-		sN = Math.sqrt(sN/(n-1));
+		sN = Math.sqrt(sN/(n-1)); //only meaningful for the SD of the whole data set
 		sArea = Math.sqrt(sArea/(n-1));
 		sMean = Math.sqrt(sMean/(n-1));
 		sIntDen = Math.sqrt(sIntDen/(n-1));

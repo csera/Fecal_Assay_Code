@@ -61,7 +61,7 @@ public class DataObj {
 		System.out.println("Num: "+N);
 		System.out.println("Area: "+area);
 		System.out.println("Mean: "+mean);
-		System.out.println("IntDen: "+intDen);
+		System.out.println("IntDen: "+intDen+"\n");
 	}
 	
 }
