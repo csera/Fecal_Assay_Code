@@ -129,6 +129,7 @@ public class Analyzer implements PlugIn {
 		}
 	}
 	
+	//TODO: filter out any non-img file types declared
 	public static List<Path> getImgs(Path p) {
 		List<Path> imgs;
 		

@@ -1,7 +1,11 @@
 package dataAnalysis;
 
-import java.io.FileReader;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import ij.plugin.PlugIn;
 
@@ -72,10 +76,89 @@ public class CSV_Compiler implements PlugIn {
 
 	public void run(String csvRoot) {
 		
+		Path csvDir = Paths.get(csvRoot);
+		
+		List<Path> csvList = getCsvs(csvDir);
+		csvList.forEach(System.out::println);
 		
 		
 	}
 	
+	public List<Path> getCsvs (Path dir){
+		List<Path> csvList;
+		try {
+			
+			csvList = Files.list(dir) //returns a *Stream* of all files & folders in Path p
+					.filter(item -> isCsv(item)) //filters for .csv files
+					.collect(Collectors.toList()); //collects output --> List
+			
+			System.out.println("Files found:");
+			csvList.forEach(System.out::println);
+			
+			return csvList;
+		} catch (IOException e) {
+			e.printStackTrace();
+			
+			return null;
+		}
+	}
 	
+	public boolean isCsv(Path item) {
+		boolean csv;
+		
+		String type = item.getFileName().toString();
+		int typeStart = type.lastIndexOf("."); //recall: Strings are zero-indexed
+		type = type.substring(typeStart);
+		
+		if(type.equalsIgnoreCase(".csv")) {
+			csv = true;
+		}
+		else {
+			csv = false;
+		}
+		
+		return csv;
+	}
+	
+	public DataObj listAvg(List<DataObj> list) {
+		DataObj avgs;
+		
+		int n = 0, area = 0, mean = 0, intDen = 0;
+		
+		for(DataObj o : list) {
+			area += o.getArea();
+			mean += o.getMean();
+			intDen += o.getIntDen();
+			
+			n++;
+		}
+		
+		avgs = new DataObj(n,area,mean,intDen);
+		
+		return avgs;
+	}
+	
+	public DataObj listSD(List<DataObj> list, DataObj avgs) {
+		DataObj sdObj;
+		int n = 0, sN = 0, sArea = 0, sMean = 0, sIntDen = 0;
+		
+		for(DataObj o : list) {
+			sN += (int) Math.pow(o.getNum()-avgs.getNum(),2);
+			sArea += (int) Math.pow(o.getArea()-avgs.getArea(),2);
+			sMean += (int) Math.pow(o.getMean()-avgs.getMean(),2);
+			sIntDen += (int) Math.pow(o.getIntDen()-avgs.getIntDen(),2);
+			
+			n++;
+		}
+		
+		sN = (int) Math.sqrt(sN/(n-1));
+		sArea = (int) Math.sqrt(sArea/(n-1));
+		sMean = (int) Math.sqrt(sMean/(n-1));
+		sIntDen = (int) Math.sqrt(sIntDen/(n-1));
+		
+		sdObj = new DataObj("SD",sN,sArea,sMean,sIntDen);
+		
+		return sdObj;
+	}
 
 }
