@@ -79,8 +79,6 @@ public class CSV_Compiler implements PlugIn {
 		Path csvDir = Paths.get(csvRoot);
 		
 		List<Path> csvList = getCsvs(csvDir);
-		csvList.forEach(System.out::println);
-		
 		
 	}
 	
