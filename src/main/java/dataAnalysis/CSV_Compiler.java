@@ -23,6 +23,8 @@ import java.nio.file.Paths;
 
 import ij.plugin.PlugIn;
 
+import imageAnalysis.Analyzer;;
+
 
 /* Current issues: listAvg() does not always actually take avg of n 
  * 		--> listSD() won't work with it if expanded beyond current functionality
@@ -85,14 +87,15 @@ import ij.plugin.PlugIn;
 
 public class CSV_Compiler implements PlugIn {
 
-	//TODO: let user choose working dir
 	public static void main(String[] args) {
 		
+		String workingDir = Analyzer.getDir("Select a source folder").toString();
+		
 		CSV_Compiler a = new CSV_Compiler();
-		a.run("C:/Users/oddba/Pictures/ImgeJ Output"); //temp hard-coded dir
+		a.run(workingDir); //temp hard-coded dir
 	}
 
-	public void run(String csvRoot) {
+	public void run(String csvRoot) { //Have to use String var type to implement PlugIn
 		
 		Path csvDir = Paths.get(csvRoot);
 		
