@@ -5,9 +5,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.opencsv.CSVReader;
+import javax.swing.JFileChooser;
 
+import com.opencsv.CSVReader;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,11 +85,11 @@ import ij.plugin.PlugIn;
 
 public class CSV_Compiler implements PlugIn {
 
+	//TODO: let user choose working dir
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
 		CSV_Compiler a = new CSV_Compiler();
-		a.run("C:/Users/oddba/Pictures/ImgeJ Output");
+		a.run("C:/Users/oddba/Pictures/ImgeJ Output"); //temp hard-coded dir
 	}
 
 	public void run(String csvRoot) {
@@ -106,6 +114,18 @@ public class CSV_Compiler implements PlugIn {
 		DataObj superSD = listSD(csvSummary,superAvg);
 		superSD.setName("Group SD");
 		superSD.printProps();
+		
+		try {
+			writeCsv(csvSummary,superAvg,superSD,csvRoot);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (CsvDataTypeMismatchException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CsvRequiredFieldEmptyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public List<Path> getCsvs (Path dir){
@@ -201,7 +221,6 @@ public class CSV_Compiler implements PlugIn {
 		return csvItems;
 	}
 	
-	
 	public DataObj listAvg(List<DataObj> list, boolean fromFile) {
 		DataObj avgs;
 
@@ -251,7 +270,6 @@ public class CSV_Compiler implements PlugIn {
 		return avgs;
 	}
 	
-	
 	public DataObj listSD(List<DataObj> list, DataObj avgs) {
 		DataObj sdObj;
 		double n = 0, sN = 0, sArea = 0, sMean = 0, sIntDen = 0;
@@ -274,5 +292,34 @@ public class CSV_Compiler implements PlugIn {
 		
 		return sdObj;
 	}
+	
+	private void writeCsv(List<DataObj> csvSummary, DataObj avgs, DataObj SDs, String csvRoot) 
+		throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+		
+		//Add avgs and SDs to start of csvSummary
+		csvSummary.add(0,SDs);
+		csvSummary.add(0,avgs);
+		
+		JFileChooser saver = new JFileChooser(csvRoot);
+			//default dir is the .csv source dir
+			//default selection mode: files only
+		saver.setDialogTitle("Save data summary as .csv (do not type .csv in name field)");
+		
+		if(saver.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {	
+			File f = saver.getSelectedFile();
+			System.out.println("Saving as: "+f);
 
+			FileWriter writer = new FileWriter(f+".csv");
+			StatefulBeanToCsvBuilder<DataObj> beanBuilder = new StatefulBeanToCsvBuilder<>(writer);
+			StatefulBeanToCsv<DataObj> beanWriter = beanBuilder.build();
+			
+			beanWriter.write(csvSummary);
+			
+			writer.close();
+		}
+		else {
+			return;
+		}
+		
+	}
 }

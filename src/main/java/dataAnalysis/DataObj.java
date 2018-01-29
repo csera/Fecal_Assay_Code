@@ -1,67 +1,67 @@
 package dataAnalysis;
 
 public class DataObj {
-	private String name;
-	private double N, area, mean, intDen;
+	private String Name;
+	private double Num, Area, Mean, IntDen;
 	
 	public DataObj(String n) {
-		this.name = n;
+		this.Name = n;
 	}
 	public DataObj(String n, double num, double a, double m, double id) {
-		this.name = n;
-		this.N = num;
-		this.area = a;
-		this.mean = m;
-		this.intDen = id;
+		this.Name = n;
+		this.Num = num;
+		this.Area = a;
+		this.Mean = m;
+		this.IntDen = id;
 	}
 	public DataObj(double num, double a, double m, double id) {
-		this.N = num;
-		this.area = a;
-		this.mean = m;
-		this.intDen = id;
+		this.Num = num;
+		this.Area = a;
+		this.Mean = m;
+		this.IntDen = id;
 	}
 	
 	public void setName(String n) {
-		name = n;
+		Name = n;
 	}
 	public String getName() {
-		return name;
+		return Name;
 	}
 	
 	public void setNum(double num) {
-		N = num;
+		Num = num;
 	}
 	public double getNum() {
-		return N;
+		return Num;
 	}
 	
 	public void setArea(double a) {
-		area = a;
+		Area = a;
 	}
 	public double getArea() {
-		return area;
+		return Area;
 	}
 	
 	public void setMean(double m) {
-		mean = m;
+		Mean = m;
 	}
 	public double getMean() {
-		return mean;
+		return Mean;
 	}
 	
 	public void setIntDen(double d) {
-		intDen = d;
+		IntDen = d;
 	}
 	public double getIntDen() {
-		return intDen;
+		return IntDen;
 	}
 	
 	public void printProps() {
-		System.out.println("Printing values of "+name);
-		System.out.println("Num: "+N);
-		System.out.println("Area: "+area);
-		System.out.println("Mean: "+mean);
-		System.out.println("IntDen: "+intDen+"\n");
+		System.out.println("Printing values of "+Name);
+		System.out.println("Num: "+Num);
+		System.out.println("Area: "+Area);
+		System.out.println("Mean: "+Mean);
+		System.out.println("IntDen: "+IntDen+"\n");
 	}
 	
 }

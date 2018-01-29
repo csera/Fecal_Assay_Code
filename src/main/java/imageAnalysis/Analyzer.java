@@ -184,7 +184,6 @@ public class Analyzer implements PlugIn {
 					Measurements.INTEGRATED_DENSITY,
 				rt,150,Double.POSITIVE_INFINITY,0.2,1.0);
 			
-			System.out.println("blarg2");
 			pa.analyze(IJ.getImage());
 			
 			String sampName = p.getFileName().toString();
