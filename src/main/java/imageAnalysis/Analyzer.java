@@ -90,7 +90,9 @@ public class Analyzer implements PlugIn {
 			System.exit(0);
 		}
 		
-		analyze(imgs, saveDir);
+		for(Path p : imgs) {
+			analyze(p, saveDir);
+		}
 		
 		int cont = JOptionPane.showOptionDialog(null,
 				"At this time, do you want to perform data compilation \n"+
@@ -161,41 +163,37 @@ public class Analyzer implements PlugIn {
 	*       particle_analyzer --> save results as csv
 	*       getOutputImage --> save
 	*/
-	public static void analyze(List<Path> imgs, Path saveDir) {
+	public static void analyze(Path p, Path saveDir) {
+		String pString = p.toString();
 		
-		for(Path p : imgs) {
-			String pString = p.toString();
-			
-			System.out.println("Working on: \n"+p);
-			
-			IJ.open(pString);
-			//IJ.runMacroFile("/resources/green_threshold.ijm"); //not finding
-			IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/Macros/green_threshold.ijm");
-				//the above works... @_@
-			
-			//Make rt explicitly to be able to reference later
-			ResultsTable rt = new ResultsTable();
-			
-			//Make ParticleAnalyzer with custom settings
-			ParticleAnalyzer pa = new ParticleAnalyzer(
-				ParticleAnalyzer.SHOW_OVERLAY_OUTLINES + ParticleAnalyzer.INCLUDE_HOLES + 
-				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.IN_SITU_SHOW,
-				Measurements.AREA + Measurements.MEAN + 
-					Measurements.INTEGRATED_DENSITY,
-				rt,250,Double.POSITIVE_INFINITY,0.2,1.0);
-			
-			pa.analyze(IJ.getImage());
-			
-			String sampName = p.getFileName().toString();
-			int nameEnd = sampName.lastIndexOf(".");
-			sampName = sampName.substring(0, nameEnd);
-			
-			System.out.println("Saving "+saveDir.toString()+"\\"+sampName+".csv");
-			rt.save(saveDir.toString()+"/"+sampName+".csv");
-			System.out.println("Saving "+saveDir.toString()+"\\"+sampName+".jpg");
-			IJ.save(saveDir.toString()+"/"+sampName+".jpg");
-			
-		}
+		System.out.println("Working on: \n"+p);
+		
+		IJ.open(pString);
+		//IJ.runMacroFile("/resources/green_threshold.ijm"); //not finding
+		IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/Macros/green_threshold.ijm");
+			//the above works... @_@
+		
+		//Make rt explicitly to be able to reference later
+		ResultsTable rt = new ResultsTable();
+		
+		//Make ParticleAnalyzer with custom settings
+		ParticleAnalyzer pa = new ParticleAnalyzer(
+			ParticleAnalyzer.SHOW_OVERLAY_OUTLINES + ParticleAnalyzer.INCLUDE_HOLES + 
+			ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.IN_SITU_SHOW,
+			Measurements.AREA + Measurements.MEAN + 
+				Measurements.INTEGRATED_DENSITY,
+			rt,250,Double.POSITIVE_INFINITY,0.2,1.0);
+		
+		pa.analyze(IJ.getImage());
+		
+		String sampName = p.getFileName().toString();
+		int nameEnd = sampName.lastIndexOf(".");
+		sampName = sampName.substring(0, nameEnd);
+		
+		System.out.println("Saving "+saveDir.toString()+"\\"+sampName+".csv");
+		rt.save(saveDir.toString()+"/"+sampName+".csv");
+		System.out.println("Saving "+saveDir.toString()+"\\"+sampName+".jpg");
+		IJ.save(saveDir.toString()+"/"+sampName+".jpg");
 		
 	}
 
