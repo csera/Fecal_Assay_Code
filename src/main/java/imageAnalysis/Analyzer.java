@@ -170,7 +170,7 @@ public class Analyzer implements PlugIn {
 			
 			IJ.open(pString);
 			//IJ.runMacroFile("/resources/green_threshold.ijm"); //not finding
-			IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/My Scripts/green_threshold.ijm");
+			IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/Macros/green_threshold.ijm");
 				//the above works... @_@
 			
 			//Make rt explicitly to be able to reference later
@@ -178,11 +178,11 @@ public class Analyzer implements PlugIn {
 			
 			//Make ParticleAnalyzer with custom settings
 			ParticleAnalyzer pa = new ParticleAnalyzer(
-				ParticleAnalyzer.SHOW_OVERLAY_OUTLINES + 
-					ParticleAnalyzer.INCLUDE_HOLES,
+				ParticleAnalyzer.SHOW_OVERLAY_OUTLINES + ParticleAnalyzer.INCLUDE_HOLES + 
+				ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.IN_SITU_SHOW,
 				Measurements.AREA + Measurements.MEAN + 
 					Measurements.INTEGRATED_DENSITY,
-				rt,150,Double.POSITIVE_INFINITY,0.2,1.0);
+				rt,250,Double.POSITIVE_INFINITY,0.2,1.0);
 			
 			pa.analyze(IJ.getImage());
 			

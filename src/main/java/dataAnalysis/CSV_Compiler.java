@@ -310,7 +310,7 @@ public class CSV_Compiler implements PlugIn {
 		
 		if(saver.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {	
 			File f = saver.getSelectedFile();
-			System.out.println("Saving as: "+f);
+			System.out.println("Saving as: "+f+".csv");
 
 			FileWriter writer = new FileWriter(f+".csv");
 			StatefulBeanToCsvBuilder<DataObj> beanBuilder = new StatefulBeanToCsvBuilder<>(writer);
