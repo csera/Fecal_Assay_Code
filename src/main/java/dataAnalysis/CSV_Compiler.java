@@ -89,7 +89,7 @@ public class CSV_Compiler implements PlugIn {
 
 	public static void main(String[] args) {
 		
-		String workingDir = Analyzer.getDir("Select a source folder").toString();
+		String workingDir = Analyzer.getDir("Select a source folder",null).toString();
 		
 		CSV_Compiler a = new CSV_Compiler();
 		a.run(workingDir); //temp hard-coded dir

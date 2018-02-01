@@ -76,7 +76,7 @@ public class Analyzer implements PlugIn {
 	 */
 	public void run(String s) {
 		IJ.log("Run initiated");
-		Path imgRoot = getDir("Select a source folder");
+		Path imgRoot = getDir("Select a source folder",null);
 		
 		if(imgRoot == null) {
 			System.exit(0);
@@ -84,7 +84,7 @@ public class Analyzer implements PlugIn {
 		
 		List<Path> imgs = getImgs(imgRoot);
 		
-		Path saveDir = getDir("Select a folder to save in");
+		Path saveDir = getDir("Select a folder to save in",imgRoot.toString());
 		
 		if(saveDir == null) {
 			System.exit(0);
@@ -113,10 +113,17 @@ public class Analyzer implements PlugIn {
 		
 	}
 	
-	public static Path getDir(String title) {
+	public static Path getDir(String title, String startDir) {
 		Path dir;
 		
-		JFileChooser dirSel = new JFileChooser(new File("."));
+		JFileChooser dirSel;
+		
+		if(startDir != null) {
+			dirSel = new JFileChooser(startDir);
+		}
+		else {
+			dirSel = new JFileChooser(new File("."));
+		}
 		dirSel.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		dirSel.setDialogTitle(title);
 		
@@ -167,12 +174,11 @@ public class Analyzer implements PlugIn {
 		String pString = p.toString();
 		
 		System.out.println("Working on: \n"+p);
-		
 		IJ.open(pString);
 		//IJ.runMacroFile("/resources/green_threshold.ijm"); //not finding
 		IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/Macros/green_threshold.ijm");
 			//the above works... @_@
-		
+				
 		//Make rt explicitly to be able to reference later
 		ResultsTable rt = new ResultsTable();
 		
@@ -185,7 +191,6 @@ public class Analyzer implements PlugIn {
 			rt,250,Double.POSITIVE_INFINITY,0.2,1.0);
 		
 		pa.analyze(IJ.getImage());
-		
 		String sampName = p.getFileName().toString();
 		int nameEnd = sampName.lastIndexOf(".");
 		sampName = sampName.substring(0, nameEnd);
