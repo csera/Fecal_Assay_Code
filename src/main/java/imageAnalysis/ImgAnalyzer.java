@@ -10,9 +10,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import ij.IJ;
+import ij.ImagePlus;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
+import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 
 import dataAnalysis.CSV_Compiler;
@@ -50,12 +52,12 @@ import dataAnalysis.CSV_Compiler;
 * 
 */
 
-public class Analyzer implements PlugIn {
+public class ImgAnalyzer implements PlugIn {
 
 	//This method is just so the code can be run from the IDE
 	public static void main(String[] args) {
 		//final ImageJ ij = new ImageJ();
-		Analyzer a = new Analyzer();
+		ImgAnalyzer a = new ImgAnalyzer();
 		a.run("");
 	}
 	
@@ -171,16 +173,23 @@ public class Analyzer implements PlugIn {
 	*       getOutputImage --> save
 	*/
 	public static void analyze(Path p, Path saveDir) {
+		//Analyzer is used by ParticleAnalyzer so, supposedly, I should be able to
+		//use its setRedirectImg(ImagePlus) method for PA...
 		String pString = p.toString();
 		
 		System.out.println("Working on: \n"+p);
+		
 		IJ.open(pString);
 		//IJ.runMacroFile("/resources/green_threshold.ijm"); //not finding
 		IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/Macros/green_threshold.ijm");
 			//the above works... @_@
-				
+		
+		ImagePlus srcImg = new ImagePlus(pString);
+		
 		//Make rt explicitly to be able to reference later
 		ResultsTable rt = new ResultsTable();
+		//IJ.run("Set Measurements...", 
+				//"redirect=["+srcImg.getTitle()+"]");
 		
 		//Make ParticleAnalyzer with custom settings
 		ParticleAnalyzer pa = new ParticleAnalyzer(
@@ -188,9 +197,11 @@ public class Analyzer implements PlugIn {
 			ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.IN_SITU_SHOW,
 			Measurements.AREA + Measurements.MEAN + 
 				Measurements.INTEGRATED_DENSITY,
-			rt,250,Double.POSITIVE_INFINITY,0.2,1.0);
+			rt,200,Double.POSITIVE_INFINITY,0.25,1.0);
 		
+		Analyzer.setRedirectImage(srcImg);
 		pa.analyze(IJ.getImage());
+		
 		String sampName = p.getFileName().toString();
 		int nameEnd = sampName.lastIndexOf(".");
 		sampName = sampName.substring(0, nameEnd);
