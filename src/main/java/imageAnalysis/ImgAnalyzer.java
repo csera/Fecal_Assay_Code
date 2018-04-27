@@ -181,7 +181,7 @@ public class ImgAnalyzer implements PlugIn {
 		
 		IJ.open(pString);
 		//IJ.runMacroFile("/resources/green_threshold.ijm"); //not finding
-		IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/Macros/green_threshold.ijm");
+		IJ.runMacroFile("C:/Users/oddba/Fiji/plugins/Macros/green_threshold v4.ijm");
 			//the above works... @_@
 		
 		ImagePlus srcImg = new ImagePlus(pString);
@@ -197,7 +197,7 @@ public class ImgAnalyzer implements PlugIn {
 			ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES + ParticleAnalyzer.IN_SITU_SHOW,
 			Measurements.AREA + Measurements.MEAN + 
 				Measurements.INTEGRATED_DENSITY,
-			rt,200,Double.POSITIVE_INFINITY,0.25,1.0);
+			rt,10,200,0.2,1.0);
 		
 		Analyzer.setRedirectImage(srcImg);
 		pa.analyze(IJ.getImage());
