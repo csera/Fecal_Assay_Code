@@ -26,7 +26,7 @@ import ij.plugin.PlugIn;
 import imageAnalysis.ImgAnalyzer;;
 
 
-/* Current issues: listAvg() does not always actually take avg of n 
+/* Current issues: listAvg() is not always called to actually take avg of n 
  * 		--> listSD() won't work with it if expanded beyond current functionality
  */
 /* Code outline:
@@ -100,26 +100,42 @@ public class CSV_Compiler implements PlugIn {
 		Path csvDir = Paths.get(csvRoot);
 		
 		List<Path> csvList = getCsvs(csvDir);
-		List<DataObj> csvSummary = new ArrayList<>();
+		List<DataObj> csvsSummary = new ArrayList<>(); //holds avg'd data for each csv
+		List<DataObj> csvsComp = new ArrayList<>(); //concatenated csvs with data sources labeled
 		
 		for(Path p : csvList) {
 			System.out.println("Working on: "+p);
-			csvSummary.add(summarizeCsv(p));
+			csvsSummary.add(summarizeCsv(p));
+
+			List<DataObj> csvItems = parseCsv(p);
+			for(DataObj d : csvItems) {
+				//override current DataObj's name with the src filename
+				d.setName(csvsSummary.get(csvsSummary.size()-1).getName());
+			}
+			csvsComp.addAll(csvItems);
 		}
 		
 		//for testing code against a single csv
 		//summarizeCsv(Paths.get("C:/Users/oddba/Pictures/ImgeJ Output/Untitled.csv"));
 		
-		DataObj superAvg = listAvg(csvSummary,false);
+		DataObj superAvg = listAvg(csvsSummary,false);
 		superAvg.setName("Group avg");
 		superAvg.printProps();
 		
-		DataObj superSD = listSD(csvSummary,superAvg);
+		DataObj superSD = listSD(csvsSummary,superAvg);
 		superSD.setName("Group SD");
 		superSD.printProps();
 		
+		//Add avgs and SDs to start of csvSummary
+		csvsSummary.add(0,superSD);
+		csvsSummary.add(0,superAvg);
+		
 		try {
-			writeCsv(csvSummary,superAvg,superSD,csvRoot);
+			String summaryTitle = "Save data summary as .csv (do not type .csv in name field)";
+			writeCsv(csvsSummary,csvRoot,summaryTitle);
+			
+			String compTitle = "Save data compilation as .csv (do not type .csv in name field)";
+			writeCsv(csvsComp,csvRoot,compTitle);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (CsvDataTypeMismatchException e) {
@@ -180,7 +196,7 @@ public class CSV_Compiler implements PlugIn {
 		
 		DataObj csvSummary = listAvg(csvItems,true);
 		
-		//Give csvSummary name of the file it summarizes
+		//Give csvSummary name of the file it summarizes (assumes no '.' in filename)
 		String sampName = csvPath.getFileName().toString();
 		int nameEnd = sampName.lastIndexOf(".");
 		sampName = sampName.substring(0, nameEnd);
@@ -298,17 +314,13 @@ public class CSV_Compiler implements PlugIn {
 		return sdObj;
 	}
 	
-	private void writeCsv(List<DataObj> csvSummary, DataObj avgs, DataObj SDs, String csvRoot) 
+	private void writeCsv(List<DataObj> csvSummary, String csvRoot, String dialogTitle) 
 		throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-		
-		//Add avgs and SDs to start of csvSummary
-		csvSummary.add(0,SDs);
-		csvSummary.add(0,avgs);
 		
 		JFileChooser saver = new JFileChooser(csvRoot);
 			//default dir is the .csv source dir
 			//default selection mode: files only
-		saver.setDialogTitle("Save data summary as .csv (do not type .csv in name field)");
+		saver.setDialogTitle(dialogTitle);
 		
 		if(saver.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {	
 			File f = saver.getSelectedFile();
